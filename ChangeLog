@@ -1,0 +1,8 @@
+2025-11-15  Deniz Yuret  <dyuret@Denizs-MacBook-Air.local>
+
+	* ray-gcp-a3-llm01.yaml:
+	gcloud components update
+	gcloud auth login [login as denizyuret@shallow.ai]
+	gcloud auth application-default login [login as denizyuret@shallow.ai]
+	gcloud config set project project-for-deniz
+	ray up -y ray-gcp-a3-llm01.yaml
