@@ -81,17 +81,26 @@ setup_commands: []
 head_setup_commands: []
 worker_setup_commands: []
 
-# Standard Ray start commands from the official GCP example.
+# Modified Ray start commands to use my environment:
 head_start_ray_commands:
-  - ray stop
-  - >
-    ray start --head --port=6379
-    --object-manager-port=8076
-    --dashboard-host=0.0.0.0
-    --autoscaling-config=~/ray_bootstrap_config.yaml
+  - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && ray stop"
+  - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && ray start --head --port=6379 --object-manager-port=8076 --dashboard-host=0.0.0.0 --autoscaling-config=~/ray_bootstrap_config.yaml"
 
 worker_start_ray_commands:
-  - ray stop
-  - >
-    ray start --address=$RAY_HEAD_IP:6379
-    --object-manager-port=8076
+  - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && ray stop"
+  - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && ray start --address=$RAY_HEAD_IP:6379 --object-manager-port=8076"
+
+# Standard Ray start commands from the official GCP example.
+# head_start_ray_commands:
+#   - ray stop
+#   - >
+#     ray start --head --port=6379
+#     --object-manager-port=8076
+#     --dashboard-host=0.0.0.0
+#     --autoscaling-config=~/ray_bootstrap_config.yaml
+
+# worker_start_ray_commands:
+#   - ray stop
+#   - >
+#     ray start --address=$RAY_HEAD_IP:6379
+#     --object-manager-port=8076

@@ -1,8 +1,138 @@
 2025-11-15  Deniz Yuret  <dyuret@Denizs-MacBook-Air.local>
 
 	* ray-gcp-a3-llm01.yaml:
+	apt install google-cloud-cli
 	gcloud components update
-	gcloud auth login [login as denizyuret@shallow.ai]
+	gcloud auth login [login as denizyuret@shallow.ai, use --no-browser for headless machine]
 	gcloud auth application-default login [login as denizyuret@shallow.ai]
 	gcloud config set project project-for-deniz
+	python3 -m venv gcp [cwd:~/envs]
+	source gcp/bin/activate
+	pip install -U 'ray[defaults]'
+	pip install google-api-python-client
+	Enable cloud resource manager api at:
+	https://console.cloud.google.com/apis/api/cloudresourcemanager.googleapis.com/metrics?project=project-for-deniz&authuser=2
+	[authuser2 to pick denizyuret@shallow.ai]
+	Enable IAM api at:
+	https://console.developers.google.com/apis/api/iam.googleapis.com/overview?project=project-for-deniz&authuser=2
+	pip install cryptography
+
 	ray up -y ray-gcp-a3-llm01.yaml
+	ray status ray-gcp-a3-llm01.yaml
+
+	To ssh to head node:
+	ray attach ray-gcp-a3-llm01.yaml # is the same as:
+	gcloud compute ssh denizyuret@<head-external-ip> --zone=us-central1-a
+	ray attach ray-gcp-a3-llm01.yaml -- python3 -c "import ray; ray.init(address='auto'); print(ray.cluster_resources())" # quick check
+
+	To run a job either do it from head node or:
+	ray submit ray-gcp-a3-llm01.yaml train.py --arg1 foo --arg2 bar
+	ray submit ray-gcp-a3-llm01.yaml -- python3 -c "print('hello from head')"
+	This runs the command and prints stdout/stderr without ssh.
+
+	To turn the cluster down:
+	ray down ray-gcp-a3-llm01.yaml
+
+	If ray down doesn't work:
+	# List Ray VMs
+	gcloud compute instances list | grep ray-a3-mega
+	# Delete VMs (example)
+	gcloud compute instances delete <head> <worker1> <worker2> ... --zone=us-central1-a
+
+
+======  Successful run log: ======
+(gcp) dyuret@a1-watcher-20250817-230652:~/gcp$ ray up -y ray-gcp-a3-llm01.yaml
+Cluster: ray-a3-mega
+
+2025-11-15 18:02:57,210	INFO util.py:389 -- setting max workers for head node type to 0
+Checking GCP environment settings
+2025-11-15 18:02:59,996	INFO config.py:585 -- _configure_key_pair: Private key not specified in config, using/home/dyuret/.ssh/ray-autoscaler_gcp_us-central1_project-for-deniz_denizyuret_0
+No head node found. Launching a new cluster. Confirm [y/N]: y [automatic, due to --yes]
+
+Usage stats collection is enabled. To disable this, add `--disable-usage-stats` to the command that starts the cluster, or run the following command: `ray disable-usage-stats` before starting the cluster. See https://docs.ray.io/en/master/cluster/usage-stats.html for more details.
+
+Acquiring an up-to-date head node
+2025-11-15 18:03:03,202	INFO node.py:349 -- wait_for_compute_zone_operation: Waiting for operation operation-1763229782498-643a5ecd7db7e-55931ad7-d66cf841 to finish...
+2025-11-15 18:03:13,646	INFO node.py:368 -- wait_for_compute_zone_operation: Operation operation-1763229782498-643a5ecd7db7e-55931ad7-d66cf841 finished.
+  Launched a new head node
+  Fetching the new head node
+  
+<1/1> Setting up head node
+  Prepared bootstrap config
+  Autoscaler v2 is now enabled by default (since Ray 2.50.0). To switch back to v1, set RAY_UP_enable_autoscaler_v2=0. This message can be suppressed by setting RAY_UP_enable_autoscaler_v2 explicitly.
+2025-11-15 18:03:14,812	INFO node.py:349 -- wait_for_compute_zone_operation: Waiting for operation operation-1763229794546-643a5ed8fb426-c25032be-1b437ed8 to finish...
+2025-11-15 18:03:20,399	INFO node.py:368 -- wait_for_compute_zone_operation: Operation operation-1763229794546-643a5ed8fb426-c25032be-1b437ed8 finished.
+  New status: waiting-for-ssh
+  [1/7] Waiting for SSH to become available
+    Running `uptime` as a test.
+    Fetched IP: 34.46.150.22
+ssh: connect to host 34.46.150.22 port 22: Connection refused
+    SSH still not available (SSH command failed.), retrying in 5 seconds.
+Connection timed out during banner exchange
+Connection to 34.46.150.22 port 22 timed out
+    SSH still not available (SSH command failed.), retrying in 5 seconds.
+Warning: Permanently added '34.46.150.22' (ED25519) to the list of known hosts.
+ 18:03:49 up 0 min,  1 user,  load average: 0.00, 0.00, 0.00
+Shared connection to 34.46.150.22 closed.
+    Success.
+  Updating cluster configuration. [hash=147e0a2791006eb63b161fee7e978904d6a8183e]
+2025-11-15 18:03:50,049	INFO node.py:349 -- wait_for_compute_zone_operation: Waiting for operation operation-1763229829805-643a5efa9b52a-afa3b525-f9b0f492 to finish...
+2025-11-15 18:03:55,667	INFO node.py:368 -- wait_for_compute_zone_operation: Operation operation-1763229829805-643a5efa9b52a-afa3b525-f9b0f492 finished.
+  New status: syncing-files
+  [2/7] Processing file mounts
+Shared connection to 34.46.150.22 closed.
+Shared connection to 34.46.150.22 closed.
+  [3/7] No worker file mounts to sync
+2025-11-15 18:03:57,192	INFO node.py:349 -- wait_for_compute_zone_operation: Waiting for operation operation-1763229836934-643a5f0167d02-0469b608-2afa3db5 to finish...
+2025-11-15 18:04:02,618	INFO node.py:368 -- wait_for_compute_zone_operation: Operation operation-1763229836934-643a5f0167d02-0469b608-2afa3db5 finished.
+  New status: setting-up
+  [4/7] No initialization commands to run.
+  [5/7] Initializing command runner
+  [6/7] No setup commands to run.
+  [7/7] Starting the Ray runtime
+Did not find any active Ray processes.
+Shared connection to 34.46.150.22 closed.
+Usage stats collection is enabled. To disable this, add `--disable-usage-stats` to the command that starts the cluster, or run the following command: `ray disable-usage-stats` before starting the cluster. See https://docs.ray.io/en/master/cluster/usage-stats.html for more details.
+
+Local node IP: 10.128.0.26
+
+--------------------
+Ray runtime started.
+--------------------
+
+Next steps
+  To add another node to this Ray cluster, run
+    ray start --address='10.128.0.26:6379'
+  
+  To connect to this Ray cluster:
+    import ray
+    ray.init()
+  
+  To terminate the Ray runtime, run
+    ray stop
+  
+  To view the status of the cluster, use
+    ray status
+Shared connection to 34.46.150.22 closed.
+2025-11-15 18:04:11,166	INFO node.py:349 -- wait_for_compute_zone_operation: Waiting for operation operation-1763229850936-643a5f0ec2396-82ce5f6a-dca8eb81 to finish...
+2025-11-15 18:04:16,701	INFO node.py:368 -- wait_for_compute_zone_operation: Operation operation-1763229850936-643a5f0ec2396-82ce5f6a-dca8eb81 finished.
+  New status: up-to-date
+
+Useful commands:
+  To terminate the cluster:
+    ray down /home/dyuret/gcp/ray-gcp-a3-llm01.yaml
+  
+  To retrieve the IP address of the cluster head:
+    ray get-head-ip /home/dyuret/gcp/ray-gcp-a3-llm01.yaml
+  
+  To port-forward the cluster's Ray Dashboard to the local machine:
+    ray dashboard /home/dyuret/gcp/ray-gcp-a3-llm01.yaml
+  
+  To submit a job to the cluster, port-forward the Ray Dashboard in another terminal and run:
+    ray job submit --address http://localhost:<dashboard-port> --working-dir . -- python my_script.py
+  
+  To connect to a terminal on the cluster head for debugging:
+    ray attach /home/dyuret/gcp/ray-gcp-a3-llm01.yaml
+  
+  To monitor autoscaling:
+    ray exec /home/dyuret/gcp/ray-gcp-a3-llm01.yaml 'tail -n 100 -f /tmp/ray/session_latest/logs/monitor*'
