@@ -1,0 +1,83 @@
+# ray-gcp-a3-llm01.yaml
+cluster_name: ray-a3-mega
+# Global cap across all worker node types
+max_workers: 8
+idle_timeout_minutes: 10
+
+provider:
+  type: gcp
+  region: us-central1
+  availability_zone: us-central1-a
+  project_id: "project-for-deniz"
+  use_internal_ips: true
+
+auth:
+  ssh_user: denizyuret
+  # ssh_private_key: /home/denizyuret/.ssh/id_rsa  # optional; only if you want to override default
+
+available_node_types:
+  ray_head_default:
+    resources: {"CPU": 16}
+    node_config:
+      machineType: "n2-standard-16"
+      disks:
+        - boot: true
+          autoDelete: true
+          type: PERSISTENT
+          initializeParams:
+            diskSizeGb: 256
+            diskType: "pd-balanced"
+            sourceImage: "projects/project-for-deniz/global/images/llm01-a3-disk-image"
+
+  a3_megagpu_worker:
+    # Start with zero A3 workers; autoscaler can go up to 8.
+    min_workers: 0
+    max_workers: 8
+    # Use actual CPU count if you like; Ray just treats this as a scheduling resource.
+    resources: {"CPU": 208, "GPU": 8}
+    node_config:
+      machineType: "a3-megagpu-8g"
+      disks:
+        - boot: true
+          autoDelete: true
+          type: PERSISTENT
+          initializeParams:
+            diskSizeGb: 256
+            diskType: "pd-balanced"
+            sourceImage: "projects/project-for-deniz/global/images/llm01-a3-disk-image"
+      # Key bit from your instance template: flex-start provisioning
+      scheduling:
+        provisioningModel: "FLEX_START"
+        onHostMaintenance: "TERMINATE"
+        automaticRestart: false
+        # These two are optional; include if you want behavior identical to the template:
+        instanceTerminationAction: "DELETE"
+        maxRunDuration:
+          seconds: "604800"
+          nanos: 0
+
+head_node_type: ray_head_default
+
+file_mounts: {}
+cluster_synced_files: []
+file_mounts_sync_continuously: False
+rsync_exclude: ["**/.git", "**/.git/**"]
+rsync_filter: [".gitignore"]
+
+setup_commands: []
+head_setup_commands: []
+worker_setup_commands: []
+
+head_start_ray_commands:
+  - ray stop
+  - >
+    ray start --head --port=6379
+    --object-manager-port=8076
+    --dashboard-host=0.0.0.0
+    --autoscaling-config=~/ray_bootstrap_config.yaml
+
+worker_start_ray_commands:
+  - ray stop
+  - >
+    ray start --address=$RAY_HEAD_IP:6379
+    --object-manager-port=8076
