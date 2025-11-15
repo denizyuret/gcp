@@ -35,7 +35,7 @@ available_node_types:
             # Correct Compute Engine diskType URI
             diskType: "projects/project-for-deniz/zones/us-central1-a/diskTypes/pd-balanced"
             # Your custom image
-            sourceImage: "projects/project-for-deniz/global/images/llm01-a3-disk-image"
+            sourceImage: "projects/project-for-deniz/global/images/llm02-a3-disk-image"
 
   a3_megagpu_worker:
     # Start with zero A3s; autoscaler can grow to 8 as needed.
@@ -51,8 +51,8 @@ available_node_types:
           type: PERSISTENT
           initializeParams:
             diskSizeGb: 256
-            diskType: "projects/project-for-deniz/zones/us-central1-a/diskTypes/pd-balanced"
-            sourceImage: "projects/project-for-deniz/global/images/llm01-a3-disk-image"
+            diskType: "projects/project-for-deniz/zones/us-central1-a/diskTypes/pd-ssd"
+            sourceImage: "projects/project-for-deniz/global/images/llm02-a3-disk-image"
       # FLEX_START scheduling for cheaper H100s (matches your template semantics)
       scheduling:
         provisioningModel: "FLEX_START"
@@ -81,28 +81,17 @@ setup_commands: []
 head_setup_commands: []
 worker_setup_commands: []
 
-# Modified Ray start commands to use my environment:
+# Standard Ray start commands from the official GCP example.
 head_start_ray_commands:
-  - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && micromamba install google-api-python-client"
-  - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && ray stop"
-  - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && ray start --head --port=6379 --object-manager-port=8076 --dashboard-host=0.0.0.0 --autoscaling-config=~/ray_bootstrap_config.yaml"
+  - ray stop
+  - >
+    ray start --head --port=6379
+    --object-manager-port=8076
+    --dashboard-host=0.0.0.0
+    --autoscaling-config=~/ray_bootstrap_config.yaml
 
 worker_start_ray_commands:
-  - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && micromamba install google-api-python-client"
-  - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && ray stop"
-  - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && ray start --address=$RAY_HEAD_IP:6379 --object-manager-port=8076"
-
-# Standard Ray start commands from the official GCP example.
-# head_start_ray_commands:
-#   - ray stop
-#   - >
-#     ray start --head --port=6379
-#     --object-manager-port=8076
-#     --dashboard-host=0.0.0.0
-#     --autoscaling-config=~/ray_bootstrap_config.yaml
-
-# worker_start_ray_commands:
-#   - ray stop
-#   - >
-#     ray start --address=$RAY_HEAD_IP:6379
-#     --object-manager-port=8076
+  - ray stop
+  - >
+    ray start --address=$RAY_HEAD_IP:6379
+    --object-manager-port=8076
