@@ -9,7 +9,7 @@ provider:
   region: us-central1
   availability_zone: us-central1-a
   project_id: "project-for-deniz"
-  use_internal_ips: true
+  use_internal_ips: false
 
 auth:
   ssh_user: denizyuret
@@ -26,7 +26,7 @@ available_node_types:
           type: PERSISTENT
           initializeParams:
             diskSizeGb: 256
-            diskType: "pd-balanced"
+            diskType: "projects/project-for-deniz/zones/us-central1-a/diskTypes/pd-balanced"
             sourceImage: "projects/project-for-deniz/global/images/llm01-a3-disk-image"
 
   a3_megagpu_worker:
@@ -43,7 +43,7 @@ available_node_types:
           type: PERSISTENT
           initializeParams:
             diskSizeGb: 256
-            diskType: "pd-balanced"
+            diskType: "projects/project-for-deniz/zones/us-central1-a/diskTypes/pd-balanced"
             sourceImage: "projects/project-for-deniz/global/images/llm01-a3-disk-image"
       # Key bit from your instance template: flex-start provisioning
       scheduling:
