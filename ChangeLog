@@ -18,7 +18,6 @@
 	pip install cryptography
 
 	ray up -y ray-gcp-a3-llm01.yaml
-	ray status ray-gcp-a3-llm01.yaml
 
 	To ssh to head node:
 	ray attach ray-gcp-a3-llm01.yaml # is the same as:

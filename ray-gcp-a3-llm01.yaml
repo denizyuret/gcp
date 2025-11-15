@@ -83,10 +83,12 @@ worker_setup_commands: []
 
 # Modified Ray start commands to use my environment:
 head_start_ray_commands:
+  - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && micromamba install google-api-python-client"
   - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && ray stop"
   - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && ray start --head --port=6379 --object-manager-port=8076 --dashboard-host=0.0.0.0 --autoscaling-config=~/ray_bootstrap_config.yaml"
 
 worker_start_ray_commands:
+  - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && micromamba install google-api-python-client"
   - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && ray stop"
   - bash -lc "source /home/denizyuret/micromamba/etc/profile.d/mamba.sh && micromamba activate latest-py311-mm && ray start --address=$RAY_HEAD_IP:6379 --object-manager-port=8076"
 
