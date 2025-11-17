@@ -35,7 +35,7 @@ available_node_types:
             # Correct Compute Engine diskType URI
             diskType: "projects/project-for-deniz/zones/us-central1-a/diskTypes/pd-balanced"
             # Your custom image
-            sourceImage: "projects/project-for-deniz/global/images/llm02-a3-disk-image"
+            sourceImage: "projects/project-for-deniz/global/images/llm-a3-disk-image-v03"
 
   a3_megagpu_worker:
     # Start with zero A3s; autoscaler can grow to 8 as needed.
@@ -52,7 +52,7 @@ available_node_types:
           initializeParams:
             diskSizeGb: 256
             diskType: "projects/project-for-deniz/zones/us-central1-a/diskTypes/pd-ssd"
-            sourceImage: "projects/project-for-deniz/global/images/llm02-a3-disk-image"
+            sourceImage: "projects/project-for-deniz/global/images/llm-a3-disk-image-v03"
       # FLEX_START scheduling for cheaper H100s (matches your template semantics)
       scheduling:
         provisioningModel: "FLEX_START"
